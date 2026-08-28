@@ -1,0 +1,48 @@
+services:
+  - type: web
+    name: napstertec-voice-gateway
+    env: docker
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
+    autoDeploy: true
+
+    envVars:
+      # Internal authentication between NIE and the Voice Gateway.
+      - key: VOICE_GATEWAY_API_KEY
+        sync: false
+
+      # Piper runtime configuration. The model itself is baked into the image.
+      - key: PIPER_VOICE_NAME
+        value: en_US-lessac-medium
+      - key: PIPER_VOICE_PATH
+        value: /opt/piper/voices/en_US-lessac-medium.onnx
+      - key: PIPER_SAMPLE_RATE
+        value: "22050"
+      - key: MAX_TTS_CHARS
+        value: "2000"
+      - key: HTTP_TIMEOUT_SECONDS
+        value: "15"
+
+      # Arkesel Voice SMS. Safe to leave the key unset until integration.
+      - key: ARKESEL_API_KEY
+        sync: false
+      - key: ARKESEL_VOICE_SMS_URL
+        value: https://sms.arkesel.com/api/v2/sms/voice/send
+      - key: ARKESEL_VOICE_ID
+        value: en-GH-female
+      - key: ARKESEL_SENDER_ID
+        value: NapsterTec
+
+      # VoiceConnect stays disabled until exact account/API details are verified.
+      - key: ARKESEL_VOICECONNECT_ENABLED
+        value: "false"
+      - key: ARKESEL_VOICECONNECT_BASE_URL
+        value: ""
+      - key: ARKESEL_VOICECONNECT_TOKEN
+        sync: false
+
+      # Controlled event bridge back into NIE Communication Intelligence.
+      - key: NIE_COMMUNICATION_WEBHOOK_URL
+        sync: false
+      - key: NIE_SERVICE_TOKEN
+        sync: false

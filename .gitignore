@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+.env.example
+
+# Piper voice models
+*.onnx
+*.onnx.json
+
+# Generated audio / benchmark files
+*.wav
+*.pcm
+tts-*.json
+
+# IDE / OS
+.vscode/
+.DS_Store
+Thumbs.db

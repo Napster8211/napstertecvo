@@ -9,7 +9,7 @@ class Settings(BaseSettings):
 
     piper_voice_name: str = "en_US-lessac-medium"
     piper_voice_path: str = (
-        "/root/.local/share/piper/voices/en_US-lessac-medium.onnx"
+        "/opt/piper/voices/en_US-lessac-medium.onnx"
     )
     piper_sample_rate: int = 22050
 

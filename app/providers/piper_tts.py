@@ -13,6 +13,15 @@ class PiperTTSProvider:
         self._voice: PiperVoice | None = None
         self._load_lock = asyncio.Lock()
 
+    @property
+    def is_loaded(self) -> bool:
+        """Return whether the configured Piper voice is resident in memory."""
+        return self._voice is not None
+
+    async def preload(self) -> None:
+        """Load Piper during application startup so readiness is truthful."""
+        await self._get_voice()
+
     async def _get_voice(self) -> PiperVoice:
         if self._voice is not None:
             return self._voice

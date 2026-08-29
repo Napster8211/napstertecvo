@@ -1,14 +1,27 @@
+from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
 
 from .config import get_settings
+from .providers.piper_tts import piper_tts
 from .routes.tts import router as tts
 from .routes.calls import router as calls
 from .routes.webhooks import router as webhooks
 
 
-app = FastAPI(title="NapsterTec Voice Gateway", version="0.1.0")
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    """Fail startup unless the local Piper voice can actually be loaded."""
+    await piper_tts.preload()
+    yield
+
+
+app = FastAPI(
+    title="NapsterTec Voice Gateway",
+    version="0.1.0",
+    lifespan=lifespan,
+)
 
 app.include_router(tts)
 app.include_router(calls)
@@ -30,7 +43,7 @@ async def health():
 
 @app.get("/ready")
 async def ready():
-    """Readiness endpoint that verifies the configured Piper model files exist."""
+    """Readiness requires both model files and an initialized Piper voice."""
     s = get_settings()
 
     model_path = Path(s.piper_voice_path)
@@ -39,6 +52,7 @@ async def ready():
     checks = {
         "piper_model": model_path.is_file(),
         "piper_config": config_path.is_file(),
+        "piper_loaded": piper_tts.is_loaded,
     }
 
     if not all(checks.values()):

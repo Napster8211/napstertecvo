@@ -7,11 +7,11 @@ class Settings(BaseSettings):
     app_env: str = "development"
     voice_gateway_api_key: str = "local-dev-change-me"
 
-    piper_voice_name: str = "en_US-lessac-medium"
+    piper_voice_name: str = "en_US-lessac-low"
     piper_voice_path: str = (
-        "/opt/piper/voices/en_US-lessac-medium.onnx"
+        "/opt/piper/voices/en_US-lessac-low.onnx"
     )
-    piper_sample_rate: int = 22050
+    piper_sample_rate: int = 16000
 
     arkesel_api_key: str = ""
     arkesel_voice_sms_url: str = (

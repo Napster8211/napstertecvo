@@ -6,21 +6,18 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PORT=8000
 
-# Install Python dependencies first so Docker can cache this layer.
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Provision the verified Piper voice deterministically instead of relying on
-# piper.download_voices' implicit download directory.
-ARG PIPER_VOICE_NAME=en_US-lessac-medium
+ARG PIPER_VOICE_NAME=en_US-lessac-low
 ARG PIPER_MODEL_SIZE=63201294
-ARG PIPER_MODEL_SHA256=5EFE09E69902187827AF646E1A6E9D269DEE769F9877D17B16B1B46EEAAF019F
-ARG PIPER_MODEL_URL=https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/lessac/medium/en_US-lessac-medium.onnx?download=true
-ARG PIPER_CONFIG_URL=https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/lessac/medium/en_US-lessac-medium.onnx.json?download=true
+ARG PIPER_MODEL_SHA256=F7D01DDE371555732C4C314111AC79672B1A5CE2FC19266AB42178FD8DF7F375
+ARG PIPER_MODEL_URL=https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/lessac/low/en_US-lessac-low.onnx?download=true
+ARG PIPER_CONFIG_URL=https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/lessac/low/en_US-lessac-low.onnx.json?download=true
 
 ENV PIPER_VOICE_NAME=${PIPER_VOICE_NAME} \
     PIPER_VOICE_PATH=/opt/piper/voices/${PIPER_VOICE_NAME}.onnx \
-    PIPER_SAMPLE_RATE=22050
+    PIPER_SAMPLE_RATE=16000
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends ca-certificates curl \
@@ -34,11 +31,10 @@ RUN apt-get update \
        -o "/opt/piper/voices/${PIPER_VOICE_NAME}.onnx.json" \
     && test "$(stat -c%s "/opt/piper/voices/${PIPER_VOICE_NAME}.onnx")" -eq "${PIPER_MODEL_SIZE}" \
     && echo "${PIPER_MODEL_SHA256}  /opt/piper/voices/${PIPER_VOICE_NAME}.onnx" | sha256sum -c - \
-    && python -c "import json; json.load(open('/opt/piper/voices/${PIPER_VOICE_NAME}.onnx.json', encoding='utf-8')); print('PIPER_CONFIG_OK')"
+    && python -c "import json; c=json.load(open('/opt/piper/voices/${PIPER_VOICE_NAME}.onnx.json', encoding='utf-8')); assert c['audio']['sample_rate'] == 16000; print('PIPER_CONFIG_OK')"
 
 COPY app ./app
 
-# Fail the image build if the application cannot import.
 RUN python -c "from app.main import app; print('APPLICATION_IMPORT_OK')"
 
 EXPOSE 8000
